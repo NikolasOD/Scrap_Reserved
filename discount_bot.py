@@ -17,7 +17,13 @@ async def start(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(*start_buttons)
 
-    await message.answer('Products with maximum discount', reply_markup=keyboard)
+    # await message.answer('Products with maximum discount', reply_markup=keyboard)
+    b_n = await bot.get_me()
+    u_n = message.from_user
+    await bot.send_message(message.chat.id,
+                           f'Welcome, {u_n.first_name}!\n I am <b>{b_n.first_name}</b>, bot created to help you shop.',
+                           parse_mode='html',
+                           reply_markup=keyboard)
 
 
 @dp.message_handler(Text(equals=['Woman', 'Man']))
