@@ -13,25 +13,43 @@ print('Bot start working ...')
 
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
-    start_buttons = ['Woman', 'Man']
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.add(*start_buttons)
+    gender_markup = types.InlineKeyboardMarkup(row_width=2)
+    item1 = types.InlineKeyboardButton("Woman", callback_data='im_woman')
+    item2 = types.InlineKeyboardButton("Man", callback_data='im_man')
+    gender_markup.add(item1, item2)
 
-    # await message.answer('Products with maximum discount', reply_markup=keyboard)
     b_n = await bot.get_me()
     u_n = message.from_user
     await bot.send_message(message.chat.id,
-                           f'Welcome, {u_n.first_name}!\n I am <b>{b_n.first_name}</b>, bot created to help you shop.',
+                           f'Welcome, {u_n.first_name}!\n I am <b>{b_n.first_name}</b>, bot created to help you shop. '
+                           f'I will find best discounts in Reserved online-shop for you. Please select your gender '
+                           f'first 👇',
                            parse_mode='html',
-                           reply_markup=keyboard)
+                           reply_markup=gender_markup)
 
 
-@dp.message_handler(Text(equals=['Woman', 'Man']))
-async def get_best_discounts(message: types.Message):
-    await message.answer('Please wait .....')
+@dp.callback_query_handler(Text(startswith='im_'))
+async def get_size(callback: types.CallbackQuery):
+    gender = str(callback.data.split('_')[1])
 
-    url_id = 1 if message.text == 'Woman' else 2
-    collect_data(url_id)
+    size_markup = types.InlineKeyboardMarkup(row_width=4)
+    item1 = types.InlineKeyboardButton("XS", callback_data=f'xs_size_{gender}')
+    item2 = types.InlineKeyboardButton("S", callback_data=f's_size_{gender}')
+    item3 = types.InlineKeyboardButton("M", callback_data=f'm_size_{gender}')
+    item4 = types.InlineKeyboardButton("L", callback_data=f'l_size_{gender}')
+    size_markup.add(item1, item2, item3, item4)
+
+    await callback.message.answer('Please select your size 👇', reply_markup=size_markup)
+
+
+@dp.callback_query_handler(Text(contains='_size_'))
+async def get_best_discounts(callback: types.CallbackQuery):
+    await callback.message.answer('Please wait .....')
+
+    user_data_lst = callback.data.split('_size_')
+    size, gender = user_data_lst
+
+    collect_data(size, gender)
 
     with open('result_data.json', encoding='utf-8') as file:
         data = json.load(file)
@@ -42,7 +60,7 @@ async def get_best_discounts(message: types.Message):
                f'{hbold("Old price: ")} {item.get("old_price")}\n' \
                f'{hbold("New price: ")} {item.get("new_price")}'
 
-        await message.answer(card)
+        await callback.message.answer(card)
 
 
 def main():

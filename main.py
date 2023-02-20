@@ -8,23 +8,32 @@ headers = {
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
                   '(KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36'
 }
+url_sizes = {
+        'sx': '&filters%5Bsizes%5D%5B%5D=xs-s-i-ua-44-48&filters%5Bsizes%5D%5B%5D=xs-i-ua-44-46&filters%5Bsizes%5D%5B'
+              '%5D=xs&filters%5Bsizes%5D%5B%5D=xs-s&filters%5Bsizes%5D%5B%5D=xs-s-i-ua-40-42&filters%5Bsizes%5D%5B%5D'
+              '=xs-i-ua-42',
+        's': '&filters%5Bsizes%5D%5B%5D=xs-s-i-ua-44-48&filters%5Bsizes%5D%5B%5D=xs-s&filters%5Bsizes%5D%5B%5D=s-i-ua'
+             '-46-48&filters%5Bsizes%5D%5B%5D=s-i-ua-44&filters%5Bsizes%5D%5B%5D=s',
+        'm': '&filters%5Bsizes%5D%5B%5D=m-l-i-ua-46-50&filters%5Bsizes%5D%5B%5D=m-l-i-ua-48-54&filters%5Bsizes%5D%5B'
+             '%5D=m-i-ua-48-50&filters%5Bsizes%5D%5B%5D=m-l&filters%5Bsizes%5D%5B%5D=m-i-ua-46&filters%5Bsizes%5D%5B'
+             '%5D=m',
+        'l': '&filters%5Bsizes%5D%5B%5D=m-l-i-ua-46-50&filters%5Bsizes%5D%5B%5D=m-l-i-ua-48-54&filters%5Bsizes%5D%5B'
+             '%5D=m-l&filters%5Bsizes%5D%5B%5D=l-i-ua-50-54&filters%5Bsizes%5D%5B%5D=l-i-ua-48-50&filters%5Bsizes%5D'
+             '%5B%5D=l '
+    }
+url_genders = {
+    'woman': 'https://arch.reserved.com/api/1007/category/27931/products?filters%5BsortBy%5D=3',
+    'man': 'https://arch.reserved.com/api/1007/category/27933/products?filters%5BsortBy%5D=3'
+}
 
 
-def collect_data(url_id):
-    url_woman = 'https://arch.reserved.com/api/1007/category/27931/products?filters%5BsortBy%5D=3'
-    url_man = 'https://arch.reserved.com/api/1007/category/27933/products?filters%5BsortBy%5D=3'
-    url = ''
-    if url_id == 1:
-        url = url_woman
-    elif url_id == 2:
-        url = url_man
+def collect_data(size, gender):
+    url_size = url_sizes.get(size)
+    url_gender = url_genders.get(gender)
+
     s = requests.Session()
     response = s.get(
-        url=f'{url}&filters%5Bsizes%5D'
-            '%5B%5D=xs-s-i-ua-44-48&filters%5Bsizes%5D%5B%5D=xs&filters%5Bsizes%5D%5B%5D=xs-s&filters%5Bsizes%5D'
-            '%5B%5D=xs-i-ua-42&filters%5Bsizes%5D%5B%5D=xs-s-i-ua-40-42&filters%5Bsizes%5D%5B%5D=xs-i-ua-44-46'
-            '&filters%5Bsizes%5D%5B%5D=s-i-ua-46-48&filters%5Bsizes%5D%5B%5D=s&filters%5Bsizes%5D%5B%5D=s-i-ua'
-            '-44&offset=200&pageSize=200',
+        url=f'{url_gender}{url_size}&offset=0&pageSize=200',
         headers=headers
     )
 
@@ -35,11 +44,7 @@ def collect_data(url_id):
 
     for page in range(pagination_count):
         product_count = page * 200
-        url = f'{url}&filters%5Bsizes%5D' \
-              f'%5B%5D=xs-s-i-ua-44-48&filters%5Bsizes%5D%5B%5D=xs&filters%5Bsizes%5D%5B%5D=xs-s&filters%5Bsizes%5D' \
-              f'%5B%5D=xs-i-ua-42&filters%5Bsizes%5D%5B%5D=xs-s-i-ua-40-42&filters%5Bsizes%5D%5B%5D=xs-i-ua-44-46' \
-              f'&filters%5Bsizes%5D%5B%5D=s-i-ua-46-48&filters%5Bsizes%5D%5B%5D=s&filters%5Bsizes%5D%5B%5D=s-i-ua-44' \
-              f'&offset={product_count}&pageSize=200'
+        url = f'{url_gender}{url_size}&offset={product_count}&pageSize=200'
         r = s.get(url=url, headers=headers)
 
         data = r.json()
@@ -69,7 +74,7 @@ def collect_data(url_id):
 
 
 def main():
-    collect_data(url_id=1)
+    collect_data(size=None, gender=None)
 
 
 if __name__ == '__main__':
