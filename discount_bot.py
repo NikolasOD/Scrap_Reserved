@@ -13,19 +13,23 @@ print('Bot start working ...')
 
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
-    gender_markup = types.InlineKeyboardMarkup(row_width=2)
-    item1 = types.InlineKeyboardButton("Woman", callback_data='im_woman')
-    item2 = types.InlineKeyboardButton("Man", callback_data='im_man')
-    gender_markup.add(item1, item2)
-
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True).add('START SHOPPING')
     b_n = await bot.get_me()
     u_n = message.from_user
     await bot.send_message(message.chat.id,
                            f'Welcome, {u_n.first_name}!\n I am <b>{b_n.first_name}</b>, bot created to help you shop. '
-                           f'I will find best discounts in Reserved online-shop for you. Please select your gender '
-                           f'first 👇',
+                           f'I will find best discounts in Reserved online-shop for you.',
                            parse_mode='html',
-                           reply_markup=gender_markup)
+                           reply_markup=keyboard)
+
+
+@dp.message_handler(Text(equals='START SHOPPING'))
+async def get_gender(message: types.Message):
+    gender_markup = types.InlineKeyboardMarkup(row_width=2)
+    item1 = types.InlineKeyboardButton("Woman", callback_data='im_woman')
+    item2 = types.InlineKeyboardButton("Man", callback_data='im_man')
+    gender_markup.add(item1, item2)
+    await message.answer('Please select your gender first 👇', reply_markup=gender_markup)
 
 
 @dp.callback_query_handler(Text(startswith='im_'))
